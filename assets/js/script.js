@@ -1,5 +1,9 @@
 var tasks = {};
 
+$("#modalDueDate").datepicker({
+  minDate: 1
+});
+
 $("#trash").droppable({
   accept: ".card .list-group-item",
   tolerance: "touch",
@@ -98,7 +102,7 @@ var loadTasks = function() {
   // loop over object properties
   $.each(tasks, function(list, arr) {
     // then loop over sub-array
-    arr.forEach(function(task) {
+    arr.forEach(function (task) {
       createTask(task.text, task.date, list);
     });
   });
@@ -108,19 +112,19 @@ var saveTasks = function() {
   localStorage.setItem("tasks", JSON.stringify(tasks));
 };
 
-// when you click the <p> in the list-group, set this as text and trim
-$(".list-group").on("click", "p", function() {
-  var text = $(this)
-    .text()
-    .trim();
-    //textImput is the new <textarea> with calss of form-control, with a value of (text) set above
-      var textInput = $("<textarea>")
-      .addClass("form-control")
-      .val(text);
-      //replace this (<p> clicked) withe textInput
-    $(this).replaceWith(textInput);
-    //textInput becomes the focus
-    textInput.trigger("focus");
+  // when you click the <p> in the list-group, set this as text and trim
+  $(".list-group").on("click", "p", function() {
+    var text = $(this)
+      .text()
+      .trim();
+      //textImput is the new <textarea> with class of form-control, with a value of (text) set above
+        var textInput = $("<textarea>")
+        .addClass("form-control")
+        .val(text);
+        //replace this (<p> clicked) withe textInput
+      $(this).replaceWith(textInput);
+      //textInput becomes the focus
+      textInput.trigger("focus");
 });
 
 // when textarea loses focus
@@ -170,12 +174,21 @@ $(".list-group").on("click", "span", function() {
   //swap out elements
   $(this).replaceWith(dateInput);
 
+  //enable jQuery UI datepicker
+  dateInput.datepicker({
+    minDate: 1,
+    onClose: function() {
+    // when calendar is closed, force a "change" event on the `dateInput`
+    $(this).trigger("change");
+    }
+  });
+
   // automatically focus on new element
   dateInput.trigger("focus");
 });
 
 //value of due date was changed
-$(".list-group").on("blur", "input[type='text']", function() {
+$(".list-group").on("change", "input[type='text']", function() {
   //get current text
   var date = $(this)
     .val()
@@ -184,7 +197,7 @@ $(".list-group").on("blur", "input[type='text']", function() {
   //get the parent ul's id attribute
   var status = $(this)
     .closest(".list-group")
-    .arrt("id")
+    .attr("id")
     .replace("list-", "");
 
   //get the task's positon in the list of other le elements
@@ -193,12 +206,12 @@ $(".list-group").on("blur", "input[type='text']", function() {
     .index();
 
   //update task in array and re-save to localStorage
-  task[status][index].date = date;
-  taveTask();
+  tasks[status][index].date = date;
+  saveTask();
 
   //reacreate span element with bootstrap classes
   var taskSpan = $("<span>")
-    .addClass("badge badge-primary bdage-pill")
+    .addClass("badge badge-primary badge-pill")
     .text(date);
 
   //replace input with span element
